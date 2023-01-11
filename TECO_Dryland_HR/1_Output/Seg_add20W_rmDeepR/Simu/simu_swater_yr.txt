@@ -1,0 +1,1 @@
+ yr,transp_yr,evap_yr,runoff_yr,water_leach_yr,swater_slw_yr,swater_slw_gs,    waterF1,waterF2,waterF3,waterF4,waterF5
