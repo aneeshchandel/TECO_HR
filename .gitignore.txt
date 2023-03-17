@@ -1,1 +1,3 @@
-./1_Output/withHR/Simu/*
+1_Output/withHR/Simu/*
+1_Output/withHR/FC/*
+1_Output/withHR/DA/*
