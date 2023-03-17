@@ -10,8 +10,6 @@
   outdir_simu='1_Output/withHR/Simu'	
   outdir_da='1_Output/withHR/DA'
   outdir_forecast='1_Output/withHR/FC'
-  outdir_da_cflux='1_Output/withHR/cflux'
-  outdir_da_swater='1_Output/withHR/swater'
   first_year=2007
   year_length=14
   yr_spinup=0
