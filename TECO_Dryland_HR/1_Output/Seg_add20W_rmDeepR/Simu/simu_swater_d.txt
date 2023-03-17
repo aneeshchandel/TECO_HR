@@ -1,1 +1,0 @@
- swc(1),swc(2),swc(3),swc(4),swc(5),swc(6),swc(7),swc(8),swc(9),swc(10)
