@@ -1564,6 +1564,10 @@ subroutine TECO_simu(MCMC,dosoilexp,do_soilphy,do_snow,rcp,clim_var_n,&  !  inpu
 
                 endif
 
+                    if(wrt_swater_d) then
+                        write(3002,30021) swc(1),swc(2),swc(3),swc(4),swc(5),swc(6),swc(7),swc(8),swc(9),swc(10) !! YZhou: addedd another five layers from 6 to 10
+                    endif
+30021               format (9(f15.10,","),(f15.10))
 
 
                 m=m+1 ! move to next hour
@@ -1586,10 +1590,11 @@ subroutine TECO_simu(MCMC,dosoilexp,do_soilphy,do_snow,rcp,clim_var_n,&  !  inpu
                     endif
 30011               format(3(f15.8,","),(f15.10))
 
-                    if(wrt_swater_d) then
-                        write(3002,30021) swc(1),swc(2),swc(3),swc(4),swc(5),swc(6),swc(7),swc(8),swc(9),swc(10) !! YZhou: addedd another five layers from 6 to 10
-                    endif
-30021               format (9(f15.10,","),(f15.10))
+! Markus 3-17-2023: commented daily writing of wrt_swater and moved it to the hourly  
+!                    if(wrt_swater_d) then
+!                        write(3002,30021) swc(1),swc(2),swc(3),swc(4),swc(5),swc(6),swc(7),swc(8),swc(9),swc(10) !! YZhou: addedd another five layers from 6 to 10
+!                    endif
+!30021               format (9(f15.10,","),(f15.10))
 
                 endif
 
@@ -2567,6 +2572,13 @@ subroutine Eco_N(Ndeposit,CNini,Cpool,NPP,outC,stemp,par_main,runoff,  &   ! inp
 
     if (isnan(MineralN)) then
         print*,"Warning: Mineral N is NAN !!!"
+        ! Markus:
+        ! The print in the next line  magically 'repairs' the possible initialization problem of MineralN which is stochasticallh NAN sometimes
+        ! which is probably due to one of the variables MineralN is computed from not being initialized (and therefore assuming
+        ! values representing whatever is written at the memory location (by some other process)
+        ! this has to be investigated (The case that it works might be worse than the failure because some variables might assume
+        ! random values...
+        print*,isnan(Nimmob) 
         stop
     endif
 
