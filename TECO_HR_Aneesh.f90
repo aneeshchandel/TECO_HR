@@ -494,7 +494,7 @@ program TECO_MCMC
                 outfile = adjustl(outfile)
             open(3302,file=outfile)
             write(3302,*) 'yr,transp_yr,evap_yr,runoff_yr,water_leach_yr,swater_slw_yr,swater_slw_gs, &
-                    &   waterF1,waterF2,waterF3,waterF4,waterF5'
+                    &   waterF1,waterF2,waterF3,waterF4,waterF5,waterF6,waterF7,waterF8,waterF9,waterF10'                   !Aneesh: !!waterF6 to waterF10 to get additional output header name
         endif
 
         if(wrt_cflux_d) then
@@ -1590,7 +1590,7 @@ subroutine TECO_simu(MCMC,dosoilexp,do_soilphy,do_snow,rcp,clim_var_n,&  !  inpu
                     endif
 30011               format(3(f15.8,","),(f15.10))
 
-! Markus 3-17-2023: commented daily writing of wrt_swater and moved it to the hourly  
+! Markus 3-17-2023: commented daily writing of wrt_swater and moved it to the hourly
 !                    if(wrt_swater_d) then
 !                        write(3002,30021) swc(1),swc(2),swc(3),swc(4),swc(5),swc(6),swc(7),swc(8),swc(9),swc(10) !! YZhou: addedd another five layers from 6 to 10
 !                    endif
@@ -1641,10 +1641,11 @@ subroutine TECO_simu(MCMC,dosoilexp,do_soilphy,do_snow,rcp,clim_var_n,&  !  inpu
 !           Write out water fluxes -------------------------
             if(wrt_swater_yr) then
                 write(3302,33021) iyr+first_year-1,transp_yr,evap_yr,runoff_yr,water_leach_yr,swater_slw_yr,swater_slw_gs, &
-                    &  waterF_yr(1),waterF_yr(2),waterF_yr(3),waterF_yr(4),waterF_yr(5)
+                    &  waterF_yr(1),waterF_yr(2),waterF_yr(3),waterF_yr(4),waterF_yr(5),waterF_yr(6),waterF_yr(7), &
+                    &  waterF_yr(8),waterF_yr(9),waterF_yr(10)                                                                  !!!Aneesh: added ,waterF_yr(6) to ,waterF_yr(10) to get the additional output
             endif
-33021       format(1(I8,","),10(f15.10,","),(f15.10))
-
+33021       format(1(I8,","),15(f15.10,","),(f15.10))
+!!!! This format style means first variable is an integer, 15 variables are floating variables with comma separated and last variable is of same format without comma separated
 
 !           Write out energy fluxes --------------------------
 !            if (wrt_energy) then
@@ -2578,7 +2579,7 @@ subroutine Eco_N(Ndeposit,CNini,Cpool,NPP,outC,stemp,par_main,runoff,  &   ! inp
         ! values representing whatever is written at the memory location (by some other process)
         ! this has to be investigated (The case that it works might be worse than the failure because some variables might assume
         ! random values...
-        print*,isnan(Nimmob) 
+        print*,isnan(Nimmob)
         stop
     endif
 
