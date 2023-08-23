@@ -21,7 +21,7 @@ program TECO_MCMC
     logical, parameter :: dods0exp= .false.
     logical, parameter :: dogsc0exp= .false.
     integer year_length,yr_spinup
-    integer, parameter :: day_length = 5114 ! 1096 ! determine size of blank array
+    integer, parameter :: day_length = 1461  !5114 ! 1096 ! determine size of blank array !Aneesh: modified it for 2017 to 2020
     integer, parameter :: hour_length = day_length*24
     integer, parameter :: spinup_cycle = 0
     integer, parameter :: clim_var_n= 7  !  if(dosoilexp) clim_var_n= 11 else 7 ! number of climate input  ! for RCP scenarios
@@ -458,6 +458,7 @@ program TECO_MCMC
 
 
 !   Write out simulated data  ---------------------------------
+! Aneesh: it creates only header of the file
         if(wrt_cflux_yr) then
             if(rcp.eq.0)then
                 cfluxfile="/simu_cflux_yr"//trim(treatname)//".txt"
@@ -1901,7 +1902,7 @@ subroutine soil_water(swc,wsmax,wsmin,watersat,waterres,condsat,wlama,potcof,n_p
     implicit none
 
 !   Switches
-    logical,parameter:: do_hydr_redist=.false.
+    logical,parameter:: do_hydr_redist=.true.
 
 !   Inputs
     integer layern
@@ -2081,12 +2082,14 @@ subroutine soil_water(swc,wsmax,wsmin,watersat,waterres,condsat,wlama,potcof,n_p
         !!Wpotent(i+1)=Amin1(-relsat(i+1)**(1/(-wlama(i+1)))/potcof(i+1),0.0)
         !! modified by YZhou, based on Ryel et al (2002), Eq. 5
 		Wpotent(i) = -1/0.2828/10200 * (((watersat(i) - waterres(i))/(swc(i) - waterres(i)))**(1/mpara(i))-1)**(1/n_pot(i))             !mpara = 1-1/n_pot !Aneesh !as mentiona in Genuchten 1980 eq 22
-		Wpotent(i+1) = -1/0.2828/10200 * (((watersat(i+1) - waterres(i+1))/(swc(i+1) - waterres(i+1)))**(1/mpara(i+1))-1)**(1/n_pot(i+1))
+		Wpotent(i+1) = -1/0.2828/10200 * (((watersat(i+1) - waterres(i+1))/(swc(i+1) - waterres(i+1)))**(1/mpara(i+1))-1)**(1/n_pot(i+1))              !!Aneesh: Unit of Wpotent is MPa
+
 
         condval(i)=condsat(i)*relsat(i)**0.5 *(1-(1-relsat(i)**(1/mpara(i)))**mpara(i))**2   ! cm h-1
         condval(i+1)=condsat(i+1)*relsat(i+1)**0.5 *(1-(1-relsat(i+1)**(1/mpara(i+1)))**mpara(i+1))**2
 
-        WpotentDT=(WPotent(i)-WPotent(i+1))*10200/((sthick(i)+sthick(i+1))/2)+1 !cm cm-1
+        WpotentDT=(WPotent(i)-WPotent(i+1))*10200/((sthick(i)+sthick(i+1))/2)+1 !cm cm-1               !! Aneesh: Unit of WpotentDT is cm
+
         if (WpotentDT.ge.0) then
             waterF(i)=Amax1(Amin1(condval(i),condval(i)*WpotentDT,(swc(i)-waterres(i))*(sthick(i)*10), &
                     &   (watersat(i+1)-swc(i+1))*(sthick(i+1)*10)),0.0) ! unit: cm/h. Since WPotent is negative, waterF is negative.
