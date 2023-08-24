@@ -31,7 +31,7 @@ program TECO_MCMC
     integer, parameter :: hour_length_ef = day_length_ef*24
 
 !   number of parameters input from outside files
-    integer,parameter :: par_n=140    ! parameter in the main parameter file ("par.csv")
+    integer,parameter :: par_n=150    ! parameter in the main parameter file ("par.csv")            !!Aneesh: replaced 140 by 150 after adding alpha_gen 
     integer,parameter :: par_stemp_n=20     !
     integer,parameter :: par_swater_n=6
     integer,parameter :: par_energy_n=13
@@ -955,7 +955,7 @@ subroutine TECO_simu(MCMC,dosoilexp,do_soilphy,do_snow,rcp,clim_var_n,&  !  inpu
 !   1.2 Read soil water parameters from pars_swater.txt, for soil_water subroutine
     integer,parameter :: par_swater_n=6
     real,dimension(par_swater_n) :: parval_swater
-    real watersat(10),waterres(10),condsat(10),wlama(10),potcof(10),n_pot(10)
+    real watersat(10),waterres(10),condsat(10),wlama(10),potcof(10),n_pot(10), alpha_gen(10)                            !Aneesh:Added alpha_gen
 
 !   1.3 Read soil temperature parameters from pars_stemp.txt, for soil_temp subroutine
     integer,parameter :: par_stemp_n=20
@@ -1129,6 +1129,7 @@ subroutine TECO_simu(MCMC,dosoilexp,do_soilphy,do_snow,rcp,clim_var_n,&  !  inpu
     n_pot=par_main(105:114)
     Cpool=par_main(115:122)
     CNini=par_main(123:130)
+    alpha_gen=par_main(141:150)                                 !Aneesh: Added aplha_gen
 
     decay_m=parval_stem(15)
     fa=parval_stem(12)
@@ -1414,7 +1415,7 @@ subroutine TECO_simu(MCMC,dosoilexp,do_soilphy,do_snow,rcp,clim_var_n,&  !  inpu
 
                 if (tec_diagn) write(*,*) "tec_diag 3:",MineralN
 
-                call soil_water(swc,wsmax,wsmin,watersat,waterres,condsat,wlama,potcof,n_pot,& ! input
+                call soil_water(swc,wsmax,wsmin,watersat,waterres,condsat,wlama,potcof,n_pot,alpha_gen,& ! input            !!Aneesh: Added alpha_gen as a parameter for Van Genuchten model part
                 &   parval_swater,transp,evap,radsol,&
                 &   sthick,rdepth,frlen,layern,&
                 &   water_free,rain,snow_depth,tair_dmean,&
@@ -1889,7 +1890,7 @@ end  ! End of subroutine canopy
 
 !*******************************************************************
 !     subroutine for soil moisture
-subroutine soil_water(swc,wsmax,wsmin,watersat,waterres,condsat,wlama,potcof,n_pot,& ! input
+subroutine soil_water(swc,wsmax,wsmin,watersat,waterres,condsat,wlama,potcof,n_pot,alpha_gen,& ! input      !Aneesh: Added alpha_gen as a parameter for Van Genuchten model part
                 &   parval_swater,transp,evap,radsol,&
                 &   sthick,rdepth,frlen,layern,&
                 &   water_free,rain,snow_depth,tair_dmean,&
@@ -1906,7 +1907,7 @@ subroutine soil_water(swc,wsmax,wsmin,watersat,waterres,condsat,wlama,potcof,n_p
 
 !   Inputs
     integer layern
-    real swc(10),wsmax(10),wsmin(10),watersat(10),waterres(10),condsat(10)
+    real swc(10),wsmax(10),wsmin(10),watersat(10),waterres(10),condsat(10), alpha_gen(10)
     real parval_swater(6),evap,transp,radsol
     real sthick(10),rdepth,depth(10),frlen(10),bmroot
     real water_free,snow_depth,zwt,ice(10),waterv(10)
@@ -2081,14 +2082,19 @@ subroutine soil_water(swc,wsmax,wsmin,watersat,waterres,condsat,wlama,potcof,n_p
         !!Wpotent(i)=Amin1(-relsat(i)**(1/(-wlama(i)))/potcof(i),0.0) ! Mpa
         !!Wpotent(i+1)=Amin1(-relsat(i+1)**(1/(-wlama(i+1)))/potcof(i+1),0.0)
         !! modified by YZhou, based on Ryel et al (2002), Eq. 5
-		Wpotent(i) = -1/0.2828/10200 * (((watersat(i) - waterres(i))/(swc(i) - waterres(i)))**(1/mpara(i))-1)**(1/n_pot(i))             !mpara = 1-1/n_pot !Aneesh !as mentiona in Genuchten 1980 eq 22
-		Wpotent(i+1) = -1/0.2828/10200 * (((watersat(i+1) - waterres(i+1))/(swc(i+1) - waterres(i+1)))**(1/mpara(i+1))-1)**(1/n_pot(i+1))              !!Aneesh: Unit of Wpotent is MPa
+		!Wpotent(i) = -1/0.2828/10200 * (((watersat(i) - waterres(i))/(swc(i) - waterres(i)))**(1/mpara(i))-1)**(1/n_pot(i))             !mpara = 1-1/n_pot !Aneesh !as mentiona in Genuchten 1980 eq 22
+		!Wpotent(i+1) = -1/0.2828/10200 * (((watersat(i+1) - waterres(i+1))/(swc(i+1) - waterres(i+1)))**(1/mpara(i+1))-1)**(1/n_pot(i+1))              !!Aneesh: Unit of Wpotent is MPa
+
+        Wpotent(i) = -1/alpha_gen(i) * & 
+        (((watersat(i) - waterres(i))/(swc(i) - waterres(i)))**(1/mpara(i))-1)**(1/n_pot(i))             
+		Wpotent(i+1) = -1/alpha_gen(i+1) * & 
+        (((watersat(i+1) - waterres(i+1))/(swc(i+1) - waterres(i+1)))**(1/mpara(i+1))-1)**(1/n_pot(i+1))              !!Aneesh: replaced 0.2828 constant value with alpha_gen for estimation
 
 
         condval(i)=condsat(i)*relsat(i)**0.5 *(1-(1-relsat(i)**(1/mpara(i)))**mpara(i))**2   ! cm h-1
         condval(i+1)=condsat(i+1)*relsat(i+1)**0.5 *(1-(1-relsat(i+1)**(1/mpara(i+1)))**mpara(i+1))**2
 
-        WpotentDT=(WPotent(i)-WPotent(i+1))*10200/((sthick(i)+sthick(i+1))/2)+1 !cm cm-1               !! Aneesh: Unit of WpotentDT is cm
+        WpotentDT=(WPotent(i)-WPotent(i+1))/((sthick(i)+sthick(i+1))/2)+1 !cm cm-1               !! Aneesh: Unit of WpotentDT is cm
 
         if (WpotentDT.ge.0) then
             waterF(i)=Amax1(Amin1(condval(i),condval(i)*WpotentDT,(swc(i)-waterres(i))*(sthick(i)*10), &
@@ -2123,8 +2129,8 @@ subroutine soil_water(swc,wsmax,wsmin,watersat,waterres,condsat,wlama,potcof,n_p
         Crt_ad = 0.097! YZhou: orginal was Crt
         do i=1,10
             do j=1,10
-				Wtheta(i) = (watersat(i)-waterres(i))/((1+abs(0.2828 * Wpotent(i))**1.40)**(1-1/1.40))
-				Wtheta(j) = (watersat(j)-waterres(j))/((1+abs(0.2828 * Wpotent(j))**1.40)**(1-1/1.40))
+				Wtheta(i) = (watersat(i)-waterres(i))/((1+abs(alpha_gen(i) * Wpotent(i))**1.40)**(1-1/1.40))                      !Aneesh: replace 0.2828 by alpha_gen
+				Wtheta(j) = (watersat(j)-waterres(j))/((1+abs(alpha_gen(j) * Wpotent(j))**1.40)**(1-1/1.40))                        !Aneesh: replace 0.2828 by alpha_gen
                 if(Wtheta(i).gt.Wtheta(j))then
                     Frlenx(i)=Frlen(i)
                 else

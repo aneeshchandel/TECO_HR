@@ -1,7 +1,7 @@
 &control_pm
-  climatefile='0_Data/input/drivers/forcing_Seg.csv'
+  climatefile='0_Data/input/drivers/Sevilleta.csv'
   forcingdir = '0_Data/input/Weathergenerate/' 
-  parafile='0_Data/input/parameters/pars.csv'
+  parafile='0_Data/input/parameters/pars_withoutHR.csv'
   parafile_siteconditions='0_Data/input/parameters/site_conditions.csv'  
   parafile_sconditions='0_Data/input/parameters/soil_conditions.csv'
   parafile_stemp='0_Data/input/parameters/pars_stemp.csv'
@@ -12,19 +12,19 @@
   outdir_forecast='1_Output/withoutHR/FC'
   outdir_da_cflux='1_Output/withoutHR/cflux'
   outdir_da_swater='1_Output/withoutHR/swater'
-  first_year=2007
-  year_length=14
+  first_year=2017
+  year_length=1
   yr_spinup=0
   MCMC=0
   search_length=0.1
   Jscaler=100
-  do_co2_da=true
-  do_swater_da=true
+  do_co2_da=.true.
+  do_swater_da=.true.
   obs_nee_file='0_Data/observations/NEE/NEE_Seg_with_gaps_day.csv'
   obs_abc_file=''
   obs_swc2p5_file='0_Data/observations/SWC/GLand_swc_2p5_d.csv'
   obs_swc12p5_file='0_Data/observations/SWC/GLand_swc_12p5_d.csv'
   obs_swc22p5_file='0_Data/observations/SWC/GLand_swc_22p5_d.csv'
   obs_swc37p5_file='0_Data/observations/SWC/GLand_swc_37p5_d.csv'
-  obs_swc52p5_file='0_Data/observations/SWC/GLand_swc_52p5_d.csv'
+  obs_swc52p5_file=''
 &end
