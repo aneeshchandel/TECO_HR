@@ -31,7 +31,7 @@ program TECO_MCMC
     integer, parameter :: hour_length_ef = day_length_ef*24
 
 !   number of parameters input from outside files
-    integer,parameter :: par_n=150    ! parameter in the main parameter file ("par.csv")            !!Aneesh: replaced 140 by 150 after adding alpha_gen 
+    integer,parameter :: par_n=151    ! parameter in the main parameter file ("par.csv")            !!Aneesh: replaced 140 by 150 after adding alpha_gen and Crt_ad
     integer,parameter :: par_stemp_n=20     !
     integer,parameter :: par_swater_n=6
     integer,parameter :: par_energy_n=13
@@ -947,7 +947,7 @@ subroutine TECO_simu(MCMC,dosoilexp,do_soilphy,do_snow,rcp,clim_var_n,&  !  inpu
     integer par_n
     real,dimension(par_n) :: par_main
     real lat,longi,wsmax(10),wsmin(10)
-    real rdepth,SLA,stom_n,Ds0,Vcmax
+    real rdepth,SLA,stom_n,Ds0,Vcmax, Crt_ad                                !Aneesh:Added Crt_ad
     real Tau_Leaf,Tau_Wood,Tau_Root,Tau_F,Tau_C
     real Tau_Micro,Tau_slowSOM,Tau_Passive
     real gddonset,Q10,gcostpro,mresp20(3),Q10paccrate(3),basew4sresp
@@ -1130,7 +1130,7 @@ subroutine TECO_simu(MCMC,dosoilexp,do_soilphy,do_snow,rcp,clim_var_n,&  !  inpu
     Cpool=par_main(115:122)
     CNini=par_main(123:130)
     alpha_gen=par_main(141:150)                                 !Aneesh: Added aplha_gen
-
+    Crt_ad=par_main(151)        !Aneesh: Added root conductivity for all roots
     decay_m=parval_stem(15)
     fa=parval_stem(12)
     fsub=parval_stem(13)
@@ -1416,7 +1416,7 @@ subroutine TECO_simu(MCMC,dosoilexp,do_soilphy,do_snow,rcp,clim_var_n,&  !  inpu
                 if (tec_diagn) write(*,*) "tec_diag 3:",MineralN
 
                 call soil_water(swc,wsmax,wsmin,watersat,waterres,condsat,wlama,potcof,n_pot,alpha_gen,& ! input            !!Aneesh: Added alpha_gen as a parameter for Van Genuchten model part
-                &   parval_swater,transp,evap,radsol,&
+                &   parval_swater,transp,evap,radsol, Crt_ad,&
                 &   sthick,rdepth,frlen,layern,&
                 &   water_free,rain,snow_depth,tair_dmean,&
                 &   zwt,ice,waterv,melt, &    ! both input and output
@@ -1891,7 +1891,7 @@ end  ! End of subroutine canopy
 !*******************************************************************
 !     subroutine for soil moisture
 subroutine soil_water(swc,wsmax,wsmin,watersat,waterres,condsat,wlama,potcof,n_pot,alpha_gen,& ! input      !Aneesh: Added alpha_gen as a parameter for Van Genuchten model part
-                &   parval_swater,transp,evap,radsol,&
+                &   parval_swater,transp,evap,radsol,Crt_ad,&                   !Aneesh: added Crt_ad as an input from the pars file
                 &   sthick,rdepth,frlen,layern,&
                 &   water_free,rain,snow_depth,tair_dmean,&
                 &   zwt,ice,waterv,melt, &    ! both input and output
@@ -1908,7 +1908,7 @@ subroutine soil_water(swc,wsmax,wsmin,watersat,waterres,condsat,wlama,potcof,n_p
 !   Inputs
     integer layern
     real swc(10),wsmax(10),wsmin(10),watersat(10),waterres(10),condsat(10), alpha_gen(10)
-    real parval_swater(6),evap,transp,radsol
+    real parval_swater(6),evap,transp,radsol           
     real sthick(10),rdepth,depth(10),frlen(10),bmroot
     real water_free,snow_depth,zwt,ice(10),waterv(10)
     real melt,rain,tair_dmean
@@ -2126,12 +2126,13 @@ subroutine soil_water(swc,wsmax,wsmin,watersat,waterres,condsat,wlama,potcof,n_p
         else
             Dtran=1
         endif
-        Crt_ad = 0.097! YZhou: orginal was Crt
+        !Crt_ad = 0.097! YZhou: orginal was Crt          !Aneesh: replaced the constant value with the estimated parameter in the pars files
         do i=1,10
             do j=1,10
-				Wtheta(i) = (watersat(i)-waterres(i))/((1+abs(alpha_gen(i) * Wpotent(i))**1.40)**(1-1/1.40))                      !Aneesh: replace 0.2828 by alpha_gen
-				Wtheta(j) = (watersat(j)-waterres(j))/((1+abs(alpha_gen(j) * Wpotent(j))**1.40)**(1-1/1.40))                        !Aneesh: replace 0.2828 by alpha_gen
-                if(Wtheta(i).gt.Wtheta(j))then
+				!Wtheta(i) = (watersat(i)-waterres(i))/((1+abs(alpha_gen(i) * Wpotent(i))**n_pot(i))**(1-1/n_pot(i)))                      !Aneesh: replace 0.2828 by alpha_gen          !Aneesh: replace 1.40 by n_pot     !Aneesh:commented out because it should be swc(i)
+				!Wtheta(j) = (watersat(j)-waterres(j))/((1+abs(alpha_gen(j) * Wpotent(j))**n_pot(j))**(1-1/n_pot(j)))                        !Aneesh: replace 0.2828 by alpha_gen         !Aneesh: Commented out because it should be swc(j)
+                !if(Wtheta(i).gt.Wtheta(j))then                             !Aneesh: commented Wthetha and replaced by swc
+                if(swc(i).gt.swc(j))then
                     Frlenx(i)=Frlen(i)
                 else
                     Frlenx(i)=Frlen(j)
