@@ -1,0 +1,28 @@
+&control_pm
+  climatefile='0_Data/input/drivers/forcing.csv'
+  forcingdir = '0_Data/input/Weathergenerate/' 
+  parafile='0_Data/input/parameters/pars.csv'
+  parafile_siteconditions='0_Data/input/parameters/site_conditions.csv'  
+  parafile_sconditions='0_Data/input/parameters/soil_conditions.csv'
+  parafile_stemp='0_Data/input/parameters/pars_stemp.csv'
+  parafile_energy='0_Data/input/parameters/pars_energy.csv' 
+  outdir='1_Output/'
+  outdir_simu='1_Output/withHR/Simu'	
+  outdir_da='1_Output/withHR/DA'
+  outdir_forecast='1_Output/withHR/FC'
+  first_year=2018
+  year_length=4
+  yr_spinup=0
+  MCMC=0
+  search_length=0.1
+  Jscaler=100
+  do_co2_da=.false.
+  do_swater_da=true
+  obs_nee_file=''
+  obs_abc_file=''
+  obs_swc2p5_file='0_Data/observations/SWC/GLand_swc_2p5_d.csv'
+  obs_swc12p5_file='0_Data/observations/SWC/GLand_swc_12p5_d.csv'
+  obs_swc22p5_file='0_Data/observations/SWC/GLand_swc_22p5_d.csv'
+  obs_swc37p5_file='0_Data/observations/SWC/GLand_swc_37p5_d.csv'
+  obs_swc52p5_file=''
+&end
